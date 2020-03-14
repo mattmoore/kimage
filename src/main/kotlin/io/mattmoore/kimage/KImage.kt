@@ -11,23 +11,28 @@ enum class ImageType {
     PNG;
 
     fun toAWT(): Int = when (this) {
-        ImageType.JPEG -> TYPE_INT_RGB
-        ImageType.PNG -> TYPE_INT_ARGB
+        JPEG -> TYPE_INT_RGB
+        PNG -> TYPE_INT_ARGB
+    }
+
+    fun toFormat(): String = when (this) {
+        JPEG -> "jpeg"
+        PNG -> "png"
     }
 }
 
 class KImage {
     companion object {
-        fun load(inputStream: InputStream, type: ImageType): BufferedImage {
+        fun load(inputStream: InputStream, type: ImageType): ByteArray {
             inputStream.use {
                 val ins = ImageIO.createImageInputStream(inputStream)
                 val reader = ImageIO.getImageReaders(ins).next()
                 try {
                     reader.input = ins
-                    val param = reader.defaultReadParam.apply {
-                        destination = BufferedImage(reader.getWidth(0), reader.getHeight(0), type.toAWT())
-                    }
-                    return reader.read(0, param)
+                    val bufferedImage = BufferedImage(reader.getWidth(0), reader.getHeight(0), type.toAWT())
+                    var byteArrayOutputStream = ByteArrayOutputStream()
+                    ImageIO.write(bufferedImage, type.toFormat(), byteArrayOutputStream)
+                    return byteArrayOutputStream.toByteArray()
                 } finally {
                     reader.dispose()
                 }
