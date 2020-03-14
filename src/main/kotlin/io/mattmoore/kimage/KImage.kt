@@ -17,18 +17,20 @@ enum class ImageType {
 }
 
 class KImage {
-    fun load(inputStream: InputStream, type: ImageType): BufferedImage {
-        inputStream.use {
-            val ins = ImageIO.createImageInputStream(inputStream)
-            val reader = ImageIO.getImageReaders(ins).next()
-            try {
-                reader.input = ins
-                val param = reader.defaultReadParam.apply {
-                    destination = BufferedImage(reader.getWidth(0), reader.getHeight(0), type.toAWT())
+    companion object {
+        fun load(inputStream: InputStream, type: ImageType): BufferedImage {
+            inputStream.use {
+                val ins = ImageIO.createImageInputStream(inputStream)
+                val reader = ImageIO.getImageReaders(ins).next()
+                try {
+                    reader.input = ins
+                    val param = reader.defaultReadParam.apply {
+                        destination = BufferedImage(reader.getWidth(0), reader.getHeight(0), type.toAWT())
+                    }
+                    return reader.read(0, param)
+                } finally {
+                    reader.dispose()
                 }
-                return reader.read(0, param)
-            } finally {
-                reader.dispose()
             }
         }
     }
